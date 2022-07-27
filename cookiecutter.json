@@ -6,7 +6,6 @@
     "module_slug": "{{ cookiecutter.module_name.lower().replace(' ', '_') }}",
     "module_short_description": "The CAMP binning pipeline replicates the functionality of MetaWRAP (one of the original ensemble `binning methods <https://github.com/bxlab/metaWRAP>`_) with i) better dependency conflict management and ii) improved integration with new binning algorithms.",
     "version": "0.1.0",
-    "use_pytest": "y",
     "create_author_file": "y",
     "open_source_license": ["MIT", "BSD", "ISCL", "Apache Software License 2.0", "Not open source"]
 }

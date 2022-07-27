@@ -1,11 +1,16 @@
+{% set is_open_source = cookiecutter.open_source_license != 'Not open source' -%}
+
+{% for _ in cookiecutter.module_name %}={% endfor %}
 ============
 CAMP {{ cookiecutter.module_name }}
 ============
+{% for _ in cookiecutter.module_name %}={% endfor %}
 
-
+{% if is_open_source %}
 .. image:: https://readthedocs.org/projects/camp-{{ cookiecutter.module_slug }}/badge/?version=latest
         :target: https://camp-{{ cookiecutter.module_slug }}.readthedocs.io/en/latest/?version=latest
         :alt: Documentation Status
+{%- endif %}
 
 .. image:: https://img.shields.io/badge/version-0.1.0-brightgreen
 
@@ -20,7 +25,7 @@ This module is designed to function as both a standalone MAG {{ cookiecutter.mod
 .. ..
 
  <!--- 
- Add description of your workflow's algorithmic contents 
+ Add longer description of your workflow's algorithmic contents 
  --->
 
 
@@ -34,8 +39,8 @@ Installation
 3. Make sure the installed pipeline works correctly. ``pytest`` only generates temporary outputs so no files should be created.
 ::
     cd camp_{{ cookiecutter.module_slug }}
-    conda env create -f configs/conda/camp_{{ cookiecutter.module_slug }}.yaml
-    conda activate camp_{{ cookiecutter.module_slug }}
+    conda env create -f configs/conda/{{ cookiecutter.module_slug }}.yaml
+    conda activate {{ cookiecutter.module_slug }}
     pytest .tests/unit/
 
 Using the Module
@@ -61,10 +66,11 @@ Using the Module
         └── __init__.py
 - ``workflow/{{ cookiecutter.module_slug }}.py``: Click-based CLI that wraps the ``snakemake`` and unit test generation commands for clean management of parameters, resources, and environment variables.
 - ``workflow/Snakefile``: The ``snakemake`` pipeline. 
-- ``workflow/utils.py``: 
+- ``workflow/utils.py``: Utility functions used in the pipeline and the CLI.
 
-1. Make your own ``samples.csv`` based on the template in ``configs/samples.csv``. Sample test data can be found in ``test_data/``.
-    * ``samples.csv`` requires absolute paths to Illumina reads (currently, ``ingest_samples`` in ``workflow/utils.py`` expects FastQs) and de novo assembled contigs.  
+1. Make your own ``samples.csv`` based on the template in ``configs/samples.csv``. Sample test data can be found in ``test_data/``. 
+    * ``ingest_samples`` in ``workflow/utils.py`` expects Illumina reads in FastQ (may be gzipped) form and de novo assembled contigs in FastA form
+    * ``samples.csv`` requires either absolute paths or symlinks relative to the directory that the module is being run in
 
 2. Update the relevant parameters in ``configs/parameters.yaml``.
 
@@ -132,6 +138,7 @@ Credits
 {% if is_open_source %} 
 * This package was created with `Cookiecutter <https://github.com/cookiecutter/cookiecutter>`_ as a simplified version of the `audreyr/cookiecutter-pypackage project template <https://github.com/audreyr/cookiecutter-pypackage>`_.
 * Free software: {{ cookiecutter.open_source_license }} 
-* Documentation: https://{{ cookiecutter.project_slug | replace("_", "-") }}.readthedocs.io. {% endif %}
+* Documentation: https://{{ cookiecutter.project_slug | replace("_", "-") }}.readthedocs.io. 
+{% endif %}
 
 

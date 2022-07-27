@@ -9,7 +9,7 @@ from utils import Workflow_Dirs, ingest_samples
 
 
 # Load and/or make the working directory structure
-dirs = Workflow_Dirs(config['work_dir'], {{ cookiecutter.module_slug }})
+dirs = Workflow_Dirs(config['work_dir'], '{{ cookiecutter.module_slug }}')
 
 
 # Load sample names and input files 
