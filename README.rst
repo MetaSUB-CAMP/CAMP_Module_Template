@@ -96,10 +96,3 @@ Immediate Tasklist
 
 * Make a table of existing CAMP modules and their input/output data
 * Cleanup of ``dirs.TMP`` directory
-
-Credits
--------
-
-* This package was created with `Cookiecutter <https://github.com/cookiecutter/cookiecutter>`_ as a simplified version of the `audreyr/cookiecutter-pypackage project template <https://github.com/audreyr/cookiecutter-pypackage>`_.
-* Free software: MIT License
-* Documentation: TBA
