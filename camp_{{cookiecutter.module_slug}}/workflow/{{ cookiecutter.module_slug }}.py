@@ -1,4 +1,4 @@
-'''CLI for the CAMP {{ cookiecutter.module_slug }} module.'''
+'''CLI for the CAMP {{ cookiecutter.module_name }} module.'''
 
 
 import click
