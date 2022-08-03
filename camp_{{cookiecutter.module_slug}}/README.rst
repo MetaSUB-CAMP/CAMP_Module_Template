@@ -34,7 +34,7 @@ Installation
 
 1. Clone repo from `github <https://github.com/{{ cookiecutter.github_username }}/camp_{{ cookiecutter.module_slug }}>_`. 
 
-2. Set up the conda environment (contains, Snakemake) using ``configs/conda/camp_{{ cookiecutter.module_slug }}.yaml``. 
+2. Set up the conda environment (contains, Snakemake) using ``configs/conda/{{ cookiecutter.module_slug }}.yaml``. 
 
 3. Make sure the installed pipeline works correctly. ``pytest`` only generates temporary outputs so no files should be created.
 ::
@@ -104,9 +104,9 @@ These instructions are meant for developers who have made a tool and want to int
 
 1. Write a module rule that wraps your tool and integrates its input and output into the pipeline. 
     * This is a great `Snakemake tutorial <https://bluegenes.github.io/hpc-snakemake-tips/>`_ for writing basic Snakemake rules.
-    * If you're adding new tools from an existing YAML, use ``conda env update --file configs/conda/camp_{{ cookiecutter.module_slug }}.yaml --prune``.
+    * If you're adding new tools from an existing YAML, use ``conda env update --file configs/conda/{{ cookiecutter.module_slug }}.yaml --prune``.
 2. Update the ``make_config`` in ``workflow/Snakefile`` rule to check for your tool's output files. Update ``samples.csv`` to document its output if downstream modules/tools are meant to ingest it. 
-3. If applicable, update the default conda config using ``conda env export > config/conda/camp_{{ cookiecutter.module_slug }}.yaml`` with your tool and its dependencies. 
+3. If applicable, update the default conda config using ``conda env export > config/conda/{{ cookiecutter.module_slug }}.yaml`` with your tool and its dependencies. 
     - If there are dependency conflicts, make a new conda YAML under ``configs/conda`` and specify its usage in specific rules using the ``conda`` option (see ``first_rule`` for an example).
 4. Add your tool's installation and running instructions to the module documentation and (if applicable) add the repo to your `Read the Docs account <https://readthedocs.org/>`_ + turn on the Read the Docs service hook.
 5. Run the pipeline once through to make sure everything works using the test data in ``test_data/`` if appropriate, or your own appropriately-sized test data. Then, generate unit tests to ensure that others can sanity-check their installations.
