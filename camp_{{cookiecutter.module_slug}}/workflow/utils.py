@@ -42,7 +42,7 @@ class Workflow_Dirs:
     LOG = ''
 
     def __init__(self, work_dir, module):
-        self.OUT = join(work_dir, {{ cookiecutter.module_slug }})
+        self.OUT = join(work_dir,'{{ cookiecutter.module_slug }}')
         self.TMP = join(work_dir, 'tmp') 
         self.LOG = join(work_dir, 'logs') 
         if not exists(self.OUT):
