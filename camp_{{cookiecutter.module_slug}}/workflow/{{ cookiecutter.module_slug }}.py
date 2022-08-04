@@ -20,7 +20,7 @@ from snakemake import snakemake
     help = 'Run workflow by submitting rules as Slurm cluster jobs')
 # @click.option('--cap2', is_flag = True, default = False, \
 #     help = 'Run workflow in CAP2 mode')
-def run(workflow, work_dir, samples, unit_test, slurm, cap2):
+def run(workflow, work_dir, samples, unit_test, slurm): # , cap2):
     # Get the absolute path of the Snakefile to find the profile configs
     main_dir = abspath(workflow).split('/')[:-2] # /path/to/main_dir/workflow/Snakefile
 
