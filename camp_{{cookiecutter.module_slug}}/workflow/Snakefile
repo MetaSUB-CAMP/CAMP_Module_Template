@@ -3,7 +3,7 @@
 
 from contextlib import redirect_stderr
 import os
-from os.path import basename, join
+from os.path import abspath, basename, dirname, join
 import pandas as pd
 from utils import Workflow_Dirs, ingest_samples
 
@@ -16,12 +16,28 @@ dirs = Workflow_Dirs(config['work_dir'], '{{ cookiecutter.module_slug }}')
 SAMPLES = ingest_samples(config['samples'], dirs.TMP)
 
 
+# Specify the location of any external resources and scripts
+dirs_ext = join(dirname(abspath(__file__)), 'ext')
+dirs_scr = join(dirs_ext, 'scripts')
+
+
 # --- Workflow output --- #
 
 
 rule all:
     input:
         join(dirs.OUT, 'final_reports', 'samples.csv') 
+
+
+def workflow_mode(wildcards):
+    aligner = 'minimap2' = if config['seq_tech'] == 'nanopore' else 'bowtie2'
+    if config['bin_refinement']:
+        return join(dirs.OUT, aligner + '_refinement', 'done.txt')
+    else:
+        output = []
+        for b in config['binners'].split(','):
+            output.append(join(dirs.OUT, '_'.join([aligner, b]), 'done.txt'))
+        return output
 
 
 # --- Workflow steps --- #
@@ -101,9 +117,30 @@ rule python_rule:
                 some_python_function()
 
 
+rule external_rule:
+    input:
+        # Some input files,
+    output:
+        # Output files/directories,
+    log:
+        # Log in appropriate subdirectory,
+    threads: # Format: config[rule_name_threads],
+    resources:
+        mem = # Format: config[rule_name_mem], 
+    params:
+        ext_script = join(dirs_scr, 'tmp.sh'),
+        ext_infile = join(dirs_ext, 'tmp.txt'),
+        # I usually put the output directory here,
+    shell:
+        """
+        mkdir -p {params.out_dir}
+        {params.ext_script} {params.ext_infile} > {log} 2>&1
+        """
+
+
 rule make_config:
     input:
-        # Intermediate input files,
+        workflow_mode, # Intermediate input files (may be determined by workflow mode)
     output:
         join(dirs.OUT, 'final_reports', 'samples.csv'),
     run:

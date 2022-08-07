@@ -10,6 +10,9 @@ from snakemake import snakemake
 @click.command('run')
 @click.option('-w', '--workflow', type = click.Path(), required = True, \
     help = 'Absolute path to the Snakefile')
+@click.option('-c', '--cores', type = int, default = 1, show_default = True, \
+    help = 'In local mode, the number of CPU cores available to run rules. \n\
+    In Slurm mode, the number of sbatch jobs submitted in parallel. ')
 @click.option('-d', '--work_dir', type = click.Path(), required = True, \
     help = 'Absolute path to working directory')
 @click.option('-s', '--samples', type = click.Path(), required = True, \
@@ -17,7 +20,7 @@ from snakemake import snakemake
 @click.option('--unit_test', is_flag = True, default = False, \
     help = 'Generate unit tests using Snakemake API')
 @click.option('--slurm', is_flag = True, default = False, \
-    help = 'Run workflow by submitting rules as Slurm cluster jobs')
+    help = 'Run workflow by submitting rules as Slurm cluster (sbatch) jobs')
 # @click.option('--cap2', is_flag = True, default = False, \
 #     help = 'Run workflow in CAP2 mode')
 def run(workflow, work_dir, samples, unit_test, slurm): # , cap2):
@@ -56,6 +59,7 @@ def run(workflow, work_dir, samples, unit_test, slurm): # , cap2):
             pyaml,
             ryaml
         ],
+        cores = cores,
         use_conda = True,
         conda_prefix = env_dir,
         generate_unit_tests = unit_test_dir,
