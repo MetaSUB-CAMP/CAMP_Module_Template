@@ -22,7 +22,7 @@ Making a New Module
 
 These instructions are only for developers that want to create an module for a **new** analysis purpose i.e.: ingests new formats of input or output data. To use or extend existing analysis modules, see TBA. 
 
-Part 1: Setting up the Pipeline Barebones
+Part 1: Setting up the Module Barebones
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 1. Have `conda <https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html>`_ and Cookiecutter (version 1.4.0 or higher) installed in some environment. 
@@ -45,12 +45,14 @@ Part 1: Setting up the Pipeline Barebones
 	conda env create -f configs/conda/{{ cookiecutter.module_slug }}.yaml
 	conda activate {{ cookiecutter.module_slug }}
 
-Part 2: Writing Pipeline Steps (Rules)
+Part 2: Writing Module Steps (Rules)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-4. Develop Snakemake rules to wrap your analysis scripts and/or external programs. There is an example (``sample_rule``) and two rule templates in ``Snakefile`` as guidelines. 
+4. Develop Snakemake rules to wrap your analysis scripts and/or external programs. There is an example (``sample_rule``) and three rule templates in ``Snakefile`` as guidelines. 
+    * If you're using external scripts and resource files that i) cannot easily be integrated into either `utils.py` or `parameters.yaml`, and ii) are not as large as databases that would justify an externally stored download, add them to ``workflow/ext/`` and use ``rule external_rule`` as a template to wrap them. 
 
 5. Customize the ``make_config`` rule in ``Snakefile`` according to intermediate rule output files to make your final output ``samples.csv`` as well as return any other analysis files you might want into the ``final_reports`` directory.
+	* If you plan to integrate multiple tools into the module that serve the same purpose but with different input or output requirements (ex. for alignment, Minimap2 for Nanopore reads vs. Bowtie2 for Illumina reads), you can toggle between these different 'streams' by setting the final files expected by ``make_config`` using the example function ``workflow_mode``.
 
 Part 3: Setting up Input/Output and Directory Structure
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -65,30 +67,32 @@ Part 3: Setting up Input/Output and Directory Structure
 9. If applicable, use symlinks in ``utils.py`` between your (original) input data as described in ``samples.csv`` to the temporary directory (``dirs.TMP``) so that they're easy to find and won't be destroyed. 
 	- To support relative paths for input files, the symlinking example uses ``abspath()``. However, this will only work if the input files are in **subdirectories** of the current directory. 
 
-Part 4: Setting up Pipeline Configs and Environment Files
+Part 4: Setting up Module Configs and Environment Files
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 10. Customize the amount of memory and CPUs allocated to each rule in the YAMLs under the ``configs/resources`` directory. 
 
-11. Some rules in the pipeline probably use constants for ``shell`` or ``run`` parameters. Add these to ``configs/parameters.yaml`` for easy toggling. 
+11. Some rules in the module probably use constants for ``shell`` or ``run`` parameters. Add these to ``configs/parameters.yaml`` for easy toggling. 
 	- In the future, it will be possible to set specific sets of parameter configurations (i.e.: one of different copies of ``configs/parameters.yaml``) from the command line.
 
 12. If applicable, update the default conda config using ``conda env export > config/conda/{{ cookiecutter.module_slug }}.yaml`` with your tools and their dependencies.
-     - If there are dependency conflicts, make a new conda YAML under ``configs/conda`` and specify its usage in specific rules using the ``conda`` option (see ``first_rule`` for an example).
+     - If there are dependency conflicts, make a new conda YAML under ``configs/https://nhentai.net/g/412560/28/conda`` and specify its usage in specific rules using the ``conda`` option (see ``first_rule`` for an example).
 
-Part 5: Write Documentation and Debug Pipeline
+Part 5: Write Documentation and Debug Module
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 13. Add your module's installation and running instructions to the ``README.rst`` and the module documentation. Then, add the repo to your `Read the Docs account <https://readthedocs.org/>`_ + turn on the Read the Docs service hook.
 
-14. Make the default conda environment, and run the pipeline once through to make sure everything works using the test data in ``test_data/``. Then, generate unit tests to ensure that others can sanity-check their installations.
+14. Make the default conda environment, and run the module once through to make sure everything works using the test data in ``test_data/``. Then, generate unit tests to ensure that others can sanity-check their installations.
+    * The default number of cores available to Snakemake is 1 which is enough for test data, but should probably be adjusted to 10+ for a real dataset.
 ::
-    python /path/to/camp_binning/workflow/binning.py generate_unit_tests \
+    python /path/to/camp_binning/workflow/binning.py (generate_unit_tests) \
         -w /path/to/camp_binning/workflow/Snakefile \
+        (-c max_number_of_local_cpu_cores) \
         -d /path/to/work/dir \
         -s /path/to/samples.csv
 
-15. If you want your module integrated into the main CAP2/CAMP pipeline, send a pull request and we'll have a look at it ASAP! 
+15. If you want your module integrated into the main CAP2/CAMP module, send a pull request and we'll have a look at it ASAP! 
     - Please make it clear what your module intends to do by including a summary in the commit/pull request (ex. "Release X.Y.Z: Module A, which does B to input C and outputs D").
 
 Immediate Tasklist
