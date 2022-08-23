@@ -49,20 +49,23 @@ Part 2: Writing Module Steps (Rules)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 4. Develop Snakemake rules to wrap your analysis scripts and/or external programs. There is an example (``sample_rule``) and three rule templates in ``Snakefile`` as guidelines. 
-    * If you're using external scripts and resource files that i) cannot easily be integrated into either `utils.py` or `parameters.yaml`, and ii) are not as large as databases that would justify an externally stored download, add them to ``workflow/ext/`` and use ``rule external_rule`` as a template to wrap them. 
+    - If you're using external scripts and resource files that i) cannot easily be integrated into either ``utils.py`` or ``parameters.yaml``, and ii) are not as large as databases that would justify an externally stored download, add them to ``workflow/ext/`` and use ``rule external_rule`` as a template to wrap them. 
+    * Note: Rules based on Python commands in a ``run`` wrapper (as opposed to a ``shell`` wrapper) will run fine locally, but for some reason will fail when submitted to compute clusters. Use at your own risk!
 
 5. Customize the ``make_config`` rule in ``Snakefile`` according to intermediate rule output files to make your final output ``samples.csv`` as well as return any other analysis files you might want into the ``final_reports`` directory.
-	* If you plan to integrate multiple tools into the module that serve the same purpose but with different input or output requirements (ex. for alignment, Minimap2 for Nanopore reads vs. Bowtie2 for Illumina reads), you can toggle between these different 'streams' by setting the final files expected by ``make_config`` using the example function ``workflow_mode``.
+	- If you plan to integrate multiple tools into the module that serve the same purpose but with different input or output requirements (ex. for alignment, Minimap2 for Nanopore reads vs. Bowtie2 for Illumina reads), you can toggle between these different 'streams' by setting the final files expected by ``make_config`` using the example function ``workflow_mode``.
 
 Part 3: Setting up Input/Output and Directory Structure
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 6. Customize the structure of ``configs/samples.csv`` to match your input and output data, and then ``ingest_samples()`` in ``utils.py`` to properly load them. 
 	- The example present summarizes Illumina paired-end FastQs and an a set of de novo assembled contigs in a FastA. 
+    - Update the description of the ``samples.csv`` input fields in the CLI. 
 
 7. Fill out your module's work subdirectory structure in ``utils.py``, specifically ``dirs.OUT``, which is where all of the intermediate and final output files go, and ``dirs.LOG``, which is where all of the logs go. 
 
 8. Add any workflow-specific Python scripts to ``utils.py`` so that they can be called in workflow rules. This keeps the ``Snakefile`` workflow clean. 
+    * Note: Python functions imported from ``utils.py`` into ``Snakefile`` should be debugged on the command-line first before being added to a rule because Snakemake doesn't port standard output/error well when using ``run:``.
 
 9. If applicable, use symlinks in ``utils.py`` between your (original) input data as described in ``samples.csv`` to the temporary directory (``dirs.TMP``) so that they're easy to find and won't be destroyed. 
 	- To support relative paths for input files, the symlinking example uses ``abspath()``. However, this will only work if the input files are in **subdirectories** of the current directory. 
@@ -85,8 +88,9 @@ Part 5: Write Documentation and Debug Module
 
 14. Make the default conda environment, and run the module once through to make sure everything works using the test data in ``test_data/``. Then, generate unit tests to ensure that others can sanity-check their installations.
     * The default number of cores available to Snakemake is 1 which is enough for test data, but should probably be adjusted to 10+ for a real dataset.
+    * Relative or absolute paths to the Snakefile and/or the working directory (if you're running elsewhere) are accepted!
 ::
-    python /path/to/camp_binning/workflow/binning.py (generate_unit_tests) \
+    python /path/to/camp_binning/workflow/binning.py (--unit_test) \
         -w /path/to/camp_binning/workflow/Snakefile \
         (-c max_number_of_local_cpu_cores) \
         -d /path/to/work/dir \

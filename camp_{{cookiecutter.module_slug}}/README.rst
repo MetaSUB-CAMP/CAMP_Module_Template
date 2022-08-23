@@ -64,37 +64,38 @@ Using the Module
         ├── {{ cookiecutter.module_slug }}.py
         ├── utils.py
         └── __init__.py
-- ``workflow/{{ cookiecutter.module_slug }}.py``: Click-based CLI that wraps the ``snakemake`` and unit test generation commands for clean management of parameters, resources, and environment variables.
-- ``workflow/Snakefile``: The ``snakemake`` pipeline. 
-- ``workflow/utils.py``: Utility functions used in the pipeline and the CLI.
+* ``workflow/{{ cookiecutter.module_slug }}.py``: Click-based CLI that wraps the ``snakemake`` and unit test generation commands for clean management of parameters, resources, and environment variables.
+* ``workflow/Snakefile``: The ``snakemake`` pipeline. 
+* ``workflow/utils.py``: Utility functions used in the pipeline and the CLI.
 
 1. Make your own ``samples.csv`` based on the template in ``configs/samples.csv``. Sample test data can be found in ``test_data/``. 
-    * ``ingest_samples`` in ``workflow/utils.py`` expects Illumina reads in FastQ (may be gzipped) form and de novo assembled contigs in FastA form
-    * ``samples.csv`` requires either absolute paths or paths relative to the directory that the module is being run in 
+    - ``ingest_samples`` in ``workflow/utils.py`` expects Illumina reads in FastQ (may be gzipped) form and de novo assembled contigs in FastA form
+    0 ``samples.csv`` requires either absolute paths or paths relative to the directory that the module is being run in 
 
 2. Update the relevant parameters in ``configs/parameters.yaml``.
 
 3. Update the computational resources available to the pipeline in ``resources/*.yaml`` where ``*`` is either 'slurm' or 'bash'. 
 
 4. To run CAMP on the command line, use the following, where ``/path/to/work/dir`` is replaced with the absolute path of your chosen working directory, and ``/path/to/samples.csv`` is replaced with your copy of ``samples.csv``. 
-    * The default number of cores available to Snakemake is 1 which is enough for test data, but should probably be adjusted to 10+ for a real dataset.
+    - The default number of cores available to Snakemake is 1 which is enough for test data, but should probably be adjusted to 10+ for a real dataset.
+    - Relative or absolute paths to the Snakefile and/or the working directory (if you're running elsewhere) are accepted!
 ::
     python /path/to/camp_{{ cookiecutter.module_slug }}/workflow/{{ cookiecutter.module_slug }}.py \
         -w /path/to/camp_{{ cookiecutter.module_slug }}/workflow/Snakefile \
         (-c max_number_of_local_cpu_cores) \
         -d /path/to/work/dir \
         -s /path/to/samples.csv
-- Note: This setup allows the main Snakefile to live outside of the work directory.
+* Note: This setup allows the main Snakefile to live outside of the work directory.
 
 5. To run CAMP on a job submission cluster (for now, only Slurm is supported), use the following.
-    * ``--slurm`` is an optional flag that submits all rules in the Snakemake pipeline as ``sbatch`` jobs. 
-    * In Slurm mode, the ``-c`` flag refers to the maximum number of ``sbatch`` jobs submitted in parallel, **not** the pool of cores available to run the jobs. Each job will request the number of cores specified by threads in ``configs/resources/slurm.yaml``.
+    - ``--slurm`` is an optional flag that submits all rules in the Snakemake pipeline as ``sbatch`` jobs. 
+    - In Slurm mode, the ``-c`` flag refers to the maximum number of ``sbatch`` jobs submitted in parallel, **not** the pool of cores available to run the jobs. Each job will request the number of cores specified by threads in ``configs/resources/slurm.yaml``.
 ::
-    sbatch -j jobname -e jobname.err.log -o jobname.out.log << "EOF"
+    sbatch -J jobname -o jobname.log << "EOF"
     #!/bin/bash
     python /path/to/camp_{{ cookiecutter.module_slug }}/workflow/{{ cookiecutter.module_slug }}.py --slurm \
         -w /path/to/camp_{{ cookiecutter.module_slug }}/workflow/Snakefile \
-        -c max_number_of_parallel_jobs_submitted \
+        (-c max_number_of_parallel_jobs_submitted) \
         -d /path/to/work/dir \
         -s /path/to/samples.csv
     EOF
@@ -107,17 +108,19 @@ We love to see it! This module was partially envisioned as a dependable, prepack
 These instructions are meant for developers who have made a tool and want to integrate or demo its functionality as part of the standard {{ cookiecutter.module_name }} workflow, or developers who want to integrate an existing tool. 
 
 1. Write a module rule that wraps your tool and integrates its input and output into the pipeline. 
-    * This is a great `Snakemake tutorial <https://bluegenes.github.io/hpc-snakemake-tips/>`_ for writing basic Snakemake rules.
-    * If you're adding new tools from an existing YAML, use ``conda env update --file configs/conda/{{ cookiecutter.module_slug }}.yaml --prune``.
-    * If you're using external scripts and resource files that i) cannot easily be integrated into either `utils.py` or `parameters.yaml`, and ii) are not as large as databases that would justify an externally stored download, add them to ``workflow/ext/`` and use ``rule external_rule`` as a template to wrap them. 
+    - This is a great `Snakemake tutorial <https://bluegenes.github.io/hpc-snakemake-tips/>`_ for writing basic Snakemake rules.
+    - If you're adding new tools from an existing YAML, use ``conda env update --file configs/conda/{{ cookiecutter.module_slug }}.yaml --prune``.
+    - If you're using external scripts and resource files that i) cannot easily be integrated into either `utils.py` or `parameters.yaml`, and ii) are not as large as databases that would justify an externally stored download, add them to ``workflow/ext/`` and use ``rule external_rule`` as a template to wrap them. 
 2. Update the ``make_config`` in ``workflow/Snakefile`` rule to check for your tool's output files. Update ``samples.csv`` to document its output if downstream modules/tools are meant to ingest it. 
-    * If you plan to integrate multiple tools into the module that serve the same purpose but with different input or output requirements (ex. for alignment, Minimap2 for Nanopore reads vs. Bowtie2 for Illumina reads), you can toggle between these different 'streams' by setting the final files expected by ``make_config`` using the example function ``workflow_mode``.
+    - If you plan to integrate multiple tools into the module that serve the same purpose but with different input or output requirements (ex. for alignment, Minimap2 for Nanopore reads vs. Bowtie2 for Illumina reads), you can toggle between these different 'streams' by setting the final files expected by ``make_config`` using the example function ``workflow_mode``.
+    - Update the description of the ``samples.csv`` input fields in the CLI script ``workflow/{{ cookiecutter.module_slug }}.py``. 
 3. If applicable, update the default conda config using ``conda env export > config/conda/{{ cookiecutter.module_slug }}.yaml`` with your tool and its dependencies. 
     - If there are dependency conflicts, make a new conda YAML under ``configs/conda`` and specify its usage in specific rules using the ``conda`` option (see ``first_rule`` for an example).
 4. Add your tool's installation and running instructions to the module documentation and (if applicable) add the repo to your `Read the Docs account <https://readthedocs.org/>`_ + turn on the Read the Docs service hook.
 5. Run the pipeline once through to make sure everything works using the test data in ``test_data/`` if appropriate, or your own appropriately-sized test data. Then, generate unit tests to ensure that others can sanity-check their installations.
+    * Note: Python functions imported from ``utils.py`` into ``Snakefile`` should be debugged on the command-line first before being added to a rule because Snakemake doesn't port standard output/error well when using ``run:``.
 ::
-    python /path/to/camp_{{ cookiecutter.module_slug }}/workflow/{{ cookiecutter.module_slug }}.py generate_unit_tests \
+    python /path/to/camp_{{ cookiecutter.module_slug }}/workflow/{{ cookiecutter.module_slug }}.py --unit_test \
         -w /path/to/camp_{{ cookiecutter.module_slug }}/workflow/Snakefile \
         -d /path/to/work/dir \
         -s /path/to/samples.csv
