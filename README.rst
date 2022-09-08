@@ -79,7 +79,7 @@ Part 4: Setting up Module Configs and Environment Files
 	- In the future, it will be possible to set specific sets of parameter configurations (i.e.: one of different copies of ``configs/parameters.yaml``) from the command line.
 
 12. If applicable, update the default conda config using ``conda env export > config/conda/{{ cookiecutter.module_slug }}.yaml`` with your tools and their dependencies.
-     - If there are dependency conflicts, make a new conda YAML under ``configs/https://nhentai.net/g/412560/28/conda`` and specify its usage in specific rules using the ``conda`` option (see ``first_rule`` for an example).
+     - If there are dependency conflicts, make a new conda YAML under ``configs/conda`` and specify its usage in specific rules using the ``conda`` option (see ``first_rule`` for an example).
 
 Part 5: Write Documentation and Debug Module
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
