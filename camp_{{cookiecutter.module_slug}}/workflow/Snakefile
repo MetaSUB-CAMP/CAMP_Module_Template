@@ -80,7 +80,7 @@ rule first_rule:
     output:
         # Output files/directories,
     conda:
-        # /path/to/camp_module/configs/conda/new_env.yaml,
+        join(config['env_yamls'], 'new_env.yaml'),
     log:
         # Log in appropriate subdirectory,
     threads: # Format: config[rule_name_threads],

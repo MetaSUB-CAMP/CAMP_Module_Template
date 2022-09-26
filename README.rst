@@ -11,7 +11,7 @@ Features
 --------
 
 * Standardized Snakemake pipelining structure with preset input/output formats for metagenomics sample data
-* Integrated Slurm and command-line modes
+* Integrated Slurm (HPC cluster job submission) and command-line modes
 * Click command line interface for easy parameter management
 * Unit-testing with pytest and simulated 2-species sequencing data
 * Read the Docs-compatible automated documentation
@@ -29,78 +29,82 @@ Part 1: Setting up the Module Barebones
 
 ::
 
-	conda install -c conda-forge cookiecutter # or...
-	pip install -U cookiecutter
+    conda install -c conda-forge cookiecutter # or...
+    pip install -U cookiecutter
 
 2. Use this template to generate a barebones CAMP analysis module and follow the prompts.
 
 ::
 
-	cookiecutter https://github.com/lauren-mak/CAMP_Module_Template.git
+    cookiecutter https://github.com/lauren-mak/CAMP_Module_Template.git
 
 3. Set up the module environment.
 
 ::
 
-	conda env create -f configs/conda/{{ cookiecutter.module_slug }}.yaml
-	conda activate {{ cookiecutter.module_slug }}
+    conda create -f configs/conda/{{ cookiecutter.module_slug }}.yaml
+    conda activate {{ cookiecutter.module_slug }}
 
 Part 2: Writing Module Steps (Rules)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-4. Develop Snakemake rules to wrap your analysis scripts and/or external programs. There is an example (``sample_rule``) and three rule templates in ``Snakefile`` as guidelines. 
-    - If you're using external scripts and resource files that i) cannot easily be integrated into either ``utils.py`` or ``parameters.yaml``, and ii) are not as large as databases that would justify an externally stored download, add them to ``workflow/ext/`` and use ``rule external_rule`` as a template to wrap them. 
-    * Note: Rules based on Python commands in a ``run`` wrapper (as opposed to a ``shell`` wrapper) will run fine locally, but for some reason will fail when submitted to compute clusters. Use at your own risk!
+1. Develop Snakemake rules to wrap your analysis scripts and/or external programs. There is an example (``sample_rule``) and three rule templates in ``Snakefile`` as guidelines. 
+    - To write to log files, add ``> {log} 2>&1`` after shell commands, unless the program writes to standard output. In that case, use ``2> {log}``. For commands in ``run`` (i.e.: built-in Python script instead of shell), see the Python example in ``workflow/Snakefile``.
+    - If you're using external scripts and resource files that i) cannot easily be integrated into either ``utils.py`` or ``parameters.yaml``, and ii) are not as large as databases that would justify an externally stored download, add them to ``workflow/ext/`` or ``workflow/ext/scripts``. An example of their application can be found in ``rule external_rule``. 
 
-5. Customize the ``make_config`` rule in ``Snakefile`` according to intermediate rule output files to make your final output ``samples.csv`` as well as return any other analysis files you might want into the ``final_reports`` directory.
-	- If you plan to integrate multiple tools into the module that serve the same purpose but with different input or output requirements (ex. for alignment, Minimap2 for Nanopore reads vs. Bowtie2 for Illumina reads), you can toggle between these different 'streams' by setting the final files expected by ``make_config`` using the example function ``workflow_mode``.
+2. Customize the ``make_config`` rule in ``Snakefile`` to make your final output ``samples.csv`` as well as return any other analysis files you might want into the ``final_reports`` directory.
+    - If you plan to integrate multiple tools into the module that serve the same purpose but with different input or output requirements (ex. for alignment, Minimap2 for Nanopore reads vs. Bowtie2 for Illumina reads), you can toggle between these different 'streams' by setting the final files expected by ``make_config`` using the example function ``workflow_mode``.
+
+3. Some of the analysis scripts and/or external programs will probably consume a lot of threads and RAM. Add these allocations/restrictions to ``configs/resources.yaml``. 
+
+4. Set up a cleanup function in ``workflow/{{ cookiecutter.module_slug }}.py`` to get rid of large intermediate files (ex. SAMs, unzipped FastQs). 
 
 Part 3: Setting up Input/Output and Directory Structure
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-6. Customize the structure of ``configs/samples.csv`` to match your input and output data, and then ``ingest_samples()`` in ``utils.py`` to properly load them. 
-	- The example present summarizes Illumina paired-end FastQs and an a set of de novo assembled contigs in a FastA. 
+1. Customize the structure of ``configs/samples.csv`` to match your input and output data, and then ``ingest_samples()`` in ``utils.py`` to properly load them. 
+    - The example here summarizes Illumina paired-end FastQs and an a set of de novo assembled contigs in a FastA. 
     - Update the description of the ``samples.csv`` input fields in the CLI. 
 
-7. Fill out your module's work subdirectory structure in ``utils.py``, specifically ``dirs.OUT``, which is where all of the intermediate and final output files go, and ``dirs.LOG``, which is where all of the logs go. 
+2. Fill out your module's work subdirectory structure in ``utils.py``, specifically ``dirs.OUT``, which is where all of the intermediate and final output files go, and ``dirs.LOG``, which is where all of the logs go. Try to make as many of your work directory's tree structure as possible.
 
-8. Add any workflow-specific Python scripts to ``utils.py`` so that they can be called in workflow rules. This keeps the ``Snakefile`` workflow clean. 
+3. Add any workflow-specific Python scripts to ``utils.py`` so that they can be called in workflow rules. This keeps the ``Snakefile`` workflow clean. 
     * Note: Python functions imported from ``utils.py`` into ``Snakefile`` should be debugged on the command-line first before being added to a rule because Snakemake doesn't port standard output/error well when using ``run:``.
 
-9. If applicable, use symlinks in ``utils.py`` between your (original) input data as described in ``samples.csv`` to the temporary directory (``dirs.TMP``) so that they're easy to find and won't be destroyed. 
-	- To support relative paths for input files, the symlinking example uses ``abspath()``. However, this will only work if the input files are in **subdirectories** of the current directory. 
+4. If applicable, use symlinks in ``utils.py`` between your (original) input data as described in ``samples.csv`` to the temporary directory (``dirs.TMP``) so that they're easy to find and won't be destroyed. 
+    - To support relative paths for input files, the symlinking example uses ``abspath()``. However, this will only work if the input files are in **subdirectories** of the current directory. 
 
 Part 4: Setting up Module Configs and Environment Files
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-10. Customize the amount of memory and CPUs allocated to each rule in the YAMLs under the ``configs/resources`` directory. 
+1. Customize the amount of memory and CPUs allocated to each rule in the YAMLs under the ``configs/resources`` directory. 
 
-11. Some rules in the module probably use constants for ``shell`` or ``run`` parameters. Add these to ``configs/parameters.yaml`` for easy toggling. 
-	- In the future, it will be possible to set specific sets of parameter configurations (i.e.: one of different copies of ``configs/parameters.yaml``) from the command line.
+2. Some rules in the module probably use constants for ``shell`` or ``run`` parameters. Add these to ``configs/parameters.yaml`` for easy toggling. 
+    - In the future, it will be possible to set specific sets of parameter configurations (i.e.: one of different copies of ``configs/parameters.yaml``) from the command line.
 
-12. If applicable, update the default conda config using ``conda env export > config/conda/{{ cookiecutter.module_slug }}.yaml`` with your tools and their dependencies.
-     - If there are dependency conflicts, make a new conda YAML under ``configs/conda`` and specify its usage in specific rules using the ``conda`` option (see ``first_rule`` for an example).
+3. If applicable, update the default conda config using ``conda env export > config/conda/{{ cookiecutter.module_slug }}.yaml`` with your tools and their dependencies.
+
+4. Some of your analysis scripts and/or external programs (ex. R-based scripts) will probably have dependencies that conflict with the main environment. To handle this, create a new environment and make a new conda YAML under ``configs/conda``. To use it, see the usage of ``conda`` option in ``first_rule`` for an example.
 
 Part 5: Write Documentation and Debug Module
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-13. Add your module's installation and running instructions to the ``README.rst`` and the module documentation. Then, add the repo to your `Read the Docs account <https://readthedocs.org/>`_ + turn on the Read the Docs service hook.
+1. Add your module's installation and running instructions to the ``README.rst`` and the module documentation. Then, add the repo to your `Read the Docs account <https://readthedocs.org/>`_ + turn on the Read the Docs service hook.
 
-14. Make the default conda environment, and run the module once through to make sure everything works using the test data in ``test_data/``. Then, generate unit tests to ensure that others can sanity-check their installations.
+2. Make the default conda environment, and run the module once through to make sure everything works using the test data in ``test_data/``. Then, generate unit tests to ensure that others can sanity-check their installations.
     * The default number of cores available to Snakemake is 1 which is enough for test data, but should probably be adjusted to 10+ for a real dataset.
     * Relative or absolute paths to the Snakefile and/or the working directory (if you're running elsewhere) are accepted!
 ::
-    python /path/to/camp_binning/workflow/binning.py (--unit_test) \
-        -w /path/to/camp_binning/workflow/Snakefile \
+
+    python /path/to/camp_module/workflow/module.py (--unit_test) \
         (-c max_number_of_local_cpu_cores) \
         -d /path/to/work/dir \
         -s /path/to/samples.csv
 
-15. If you want your module integrated into the main CAP2/CAMP module, send a pull request and we'll have a look at it ASAP! 
+3. If you want your module integrated into the main CAMP module, send a pull request and we'll have a look at it ASAP! 
     - Please make it clear what your module intends to do by including a summary in the commit/pull request (ex. "Release X.Y.Z: Module A, which does B to input C and outputs D").
 
 Immediate Tasklist
 ------------------
 
 * Make a table of existing CAMP modules and their input/output data
-* Cleanup of ``dirs.TMP`` directory
