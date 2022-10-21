@@ -100,6 +100,21 @@ Using the Module
         -s /path/to/samples.csv
     EOF
 
+6. After checking over ``final_reports/`` and making sure you have everything you need, you can delete all intermediate files to save space. 
+::
+
+    python /path/to/camp_{{ cookiecutter.module_slug }}/workflow/{{ cookiecutter.module_slug }}.py cleanup \
+        -d /path/to/work/dir \
+        -s /path/to/samples.csv
+
+7. If for some reason the module keeps failing, CAMP can print a script containing all of the remaining commands that can be run manually. 
+::
+
+    python /path/to/camp_{{ cookiecutter.module_slug }}/workflow/{{ cookiecutter.module_slug }}.py --dry_run \
+        -d /path/to/work/dir \
+        -s /path/to/samples.csv > cmds.txt
+    python /path/to/camp_{{ cookiecutter.module_slug }}/workflow/{{ cookiecutter.module_slug }}.py commands cmds.txt
+
 Extending the Module
 --------------------
 

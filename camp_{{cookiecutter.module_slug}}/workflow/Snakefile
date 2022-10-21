@@ -1,10 +1,11 @@
-'''Workflow for the CAMP binning module.'''
+'''Workflow for the CAMP {{ cookiecutter.module_name }} module.'''
 
 
 from contextlib import redirect_stderr
 import os
 from os.path import abspath, basename, dirname, join
 import pandas as pd
+from shutil import copy
 from utils import Workflow_Dirs, ingest_samples
 
 
@@ -56,7 +57,7 @@ rule sample_rule:
         join(dirs.LOG, 'map_sort', '{sample}.out'),
     threads: config['map_sort_threads'],
     resources:
-        mem = lambda wildcards, attempt: \
+        mem_mb = lambda wildcards, attempt: \
               int(config['map_sort_mem_mb']) + 10000 * attempt,
     params:
         out_dir = join(dirs.OUT, '0_contig_coverage', '{sample}'),
@@ -85,7 +86,7 @@ rule first_rule:
         # Log in appropriate subdirectory,
     threads: # Format: config[rule_name_threads],
     resources:
-        mem = # Format: config[rule_name_mem], 
+        mem_mb = # Format: config[rule_name_mem], 
     params:
         some_constant = config['some_constant'],
         other_constant = config['other_constant'],
@@ -106,7 +107,7 @@ rule python_rule:
         # Log in appropriate subdirectory,
     threads: # Format: config[rule_name_threads],
     resources:
-        mem = # Format: config[rule_name_mem], 
+        mem_mb = # Format: config[rule_name_mem], 
     params:
         some_constant = config['some_constant'],
         # I usually put the output directory here,
@@ -126,7 +127,7 @@ rule external_rule:
         # Log in appropriate subdirectory,
     threads: # Format: config[rule_name_threads],
     resources:
-        mem = # Format: config[rule_name_mem], 
+        mem_mb = # Format: config[rule_name_mem], 
     params:
         ext_script = join(dirs_scr, 'tmp.sh'),
         ext_infile = join(dirs_ext, 'tmp.txt'),
@@ -142,13 +143,20 @@ rule make_config:
     input:
         workflow_mode, # Intermediate input files (may be determined by workflow mode)
     output:
-        join(dirs.OUT, 'final_reports', 'samples.csv'),
+        csv = join(dirs.OUT, 'final_reports', 'samples.csv'),
+        txt = join(dirs.OUT, 'final_reports', 'report.txt'),
     run:
         # Collate workflow outputs and i) summarize them in a new samples.csv for downstream analysis and/or ii) copy them to 'final_reports' for external data analysis
+        copy(str(input[0]), str(output.txt))
+        dct = {}
+        for i in params.samples:
+            s = i.split('/')[-1]
+            if s not in dct: dct[s] = {}
+            dct[str(input[1][s])]['illumina_fwd'] = s
         df = pd.DataFrame.from_dict(dct, orient ='index')
         df.reset_index(inplace = True)
         df.rename(columns = {'index': 'sample_name'}, inplace = True)
-        df.to_csv(str(output), index = False)
+        df.to_csv(str(output.csv), index = False)
 
 
 

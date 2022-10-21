@@ -2,9 +2,17 @@
 
 
 import click
-from os import makedirs
+from click_default_group import DefaultGroup
+from os import getcwd, makedirs
 from os.path import abspath, dirname, exists, join
 from snakemake import snakemake, main
+from shutil import rmtree
+from utils import Workflow_Dirs, print_cmds, cleanup_files
+
+
+@click.group(cls = DefaultGroup, default = 'run', default_if_no_args = True)
+def cli():
+    pass
 
 
 def sbatch(workflow, work_dir, samples, env_yamls, pyaml, ryaml, cores, env_dir, s_dir):
@@ -27,7 +35,7 @@ def sbatch(workflow, work_dir, samples, env_yamls, pyaml, ryaml, cores, env_dir,
     ])
 
 
-def cmd_line(workflow, work_dir, samples, env_yamls, pyaml, ryaml, cores, env_dir, unit_test_dir, unlock):
+def cmd_line(workflow, work_dir, samples, env_yamls, pyaml, ryaml, cores, env_dir, unit_test_dir, dry_run, unlock):
     snakemake(
         workflow,
         config = {
@@ -47,11 +55,12 @@ def cmd_line(workflow, work_dir, samples, env_yamls, pyaml, ryaml, cores, env_di
         keepgoing = True,
         latency_wait = 60,
         generate_unit_tests = unit_test_dir,
+        dryrun = dry_run,
         unlock = unlock
     )
 
 
-@click.command('run')
+@cli.command('run')
 @click.option('-c', '--cores', type = int, default = 1, show_default = True, \
     help = 'In local mode, the number of CPU cores available to run rules. \n\
     In Slurm mode, the number of sbatch jobs submitted in parallel. ')
@@ -63,9 +72,11 @@ def cmd_line(workflow, work_dir, samples, env_yamls, pyaml, ryaml, cores, env_di
     help = 'Generate unit tests using Snakemake API')
 @click.option('--slurm', is_flag = True, default = False, \
     help = 'Run workflow by submitting rules as Slurm cluster jobs')
+@click.option('--dry_run', is_flag = True, default = False, \
+    help = 'Set up directory structure and print workflow commands to be run separately')
 @click.option('--unlock', is_flag = True, default = False, \
     help = 'Remove a lock on the work directory')
-def run(cores, work_dir, samples, unit_test, slurm, unlock): 
+def run(cores, work_dir, samples, unit_test, slurm, dry_run, unlock): 
     # Get the absolute path of the Snakefile to find the profile configs
     main_dir = dirname(dirname(abspath(__file__))) # /path/to/main_dir/workflow/cli.py
     workflow = join(main_dir, 'workflow', 'Snakefile')
@@ -86,30 +97,44 @@ def run(cores, work_dir, samples, unit_test, slurm, unlock):
     # If rules failed previously, unlock the directory
     if unlock:
         cmd_line(workflow, work_dir, samples, env_yamls, pyaml, ryaml,   \
-                 cores, env_dir, unit_test_dir, unlock)        
-
+                 cores, env_dir, unit_test_dir, False, unlock)        
+        rmtree(join(getcwd(), '.snakemake'))
+        
     # Run workflow
     if slurm:
         sbatch(workflow, work_dir, samples, env_yamls, pyaml, ryaml,     \
                cores, env_dir, join(main_dir, 'configs', 'sbatch'))
+    elif dry_run:
+        # Set up the directory structure skeleton
+        Workflow_Dirs(work_dir, 'short-read-taxonomy')
+        # Print the dry run standard out
+        cmd_line(workflow, work_dir, samples, env_yamls, pyaml, ryaml,   \
+                 cores, env_dir, unit_test_dir, True, False)
     else:
         cmd_line(workflow, work_dir, samples, env_yamls, pyaml, ryaml,   \
-                 cores, env_dir, unit_test_dir, False)
+                 cores, env_dir, unit_test_dir, False, False)
 
 
-@click.command('cleanup')
+@cli.command('cleanup')
 @click.option('-d', '--work_dir', type = click.Path(), required = True, \
     help = 'Absolute path to working directory')
 @click.option('-s', '--samples', type = click.Path(), required = True, \
     help = 'Sample CSV in format [sample_name,...,]')
 def cleanup(work_dir, samples): 
     df = pd.read_csv(samples, header = 0, index_col = 0) # name, fwd, rev
-    smps = list(df.index)
-    # for d in dirs.OUT:
-    #     for s in smps:
-    #         os.remove(join(work_dir, '{{ cookiecutter.module_slug }}', d, file_to_remove))
-    #         os.remove(join(work_dir, '{{ cookiecutter.module_slug }}', d, file_to_remove))
+    cleanup_files(work_dir, df)
 
 
-if __name__ == "__main__":
-    run()
+@cli.command('commands')
+@click.argument('input', type = click.Path(), required = True)
+def commands(input): 
+    print_cmds(input)
+
+
+cli.add_command(run)
+cli.add_command(cleanup)
+cli.add_command(commands)
+
+
+if __name__ == '__main__':
+    cli()

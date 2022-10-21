@@ -10,7 +10,7 @@ The Cookiecutter template for all CAMP (**C**\ ore **A**\ nalysis **M**\ etageno
 Features
 --------
 
-* Standardized Snakemake pipelining structure with preset input/output formats for metagenomics sample data
+* Standardized Snakemake pipelining structure with preset input/output formats for metagenomics multi-sample data
 * Integrated Slurm (HPC cluster job submission) and command-line modes
 * Click command line interface for easy parameter management
 * Unit-testing with pytest and simulated 2-species sequencing data
@@ -42,8 +42,8 @@ Part 1: Setting up the Module Barebones
 
 ::
 
-    conda create -f configs/conda/{{ cookiecutter.module_slug }}.yaml
-    conda activate {{ cookiecutter.module_slug }}
+    conda create -f configs/conda/module.yaml
+    conda activate module
 
 Part 2: Writing Module Steps (Rules)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -57,7 +57,7 @@ Part 2: Writing Module Steps (Rules)
 
 3. Some of the analysis scripts and/or external programs will probably consume a lot of threads and RAM. Add these allocations/restrictions to ``configs/resources.yaml``. 
 
-4. Set up a cleanup function in ``workflow/{{ cookiecutter.module_slug }}.py`` to get rid of large intermediate files (ex. SAMs, unzipped FastQs). 
+4. Set up a cleanup function in ``workflow/utils.py`` to get rid of large intermediate files (ex. SAMs, unzipped FastQs). 
 
 Part 3: Setting up Input/Output and Directory Structure
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -82,7 +82,7 @@ Part 4: Setting up Module Configs and Environment Files
 2. Some rules in the module probably use constants for ``shell`` or ``run`` parameters. Add these to ``configs/parameters.yaml`` for easy toggling. 
     - In the future, it will be possible to set specific sets of parameter configurations (i.e.: one of different copies of ``configs/parameters.yaml``) from the command line.
 
-3. If applicable, update the default conda config using ``conda env export > config/conda/{{ cookiecutter.module_slug }}.yaml`` with your tools and their dependencies.
+3. If applicable, update the default conda config using ``conda env export > config/conda/module.yaml`` with your tools and their dependencies.
 
 4. Some of your analysis scripts and/or external programs (ex. R-based scripts) will probably have dependencies that conflict with the main environment. To handle this, create a new environment and make a new conda YAML under ``configs/conda``. To use it, see the usage of ``conda`` option in ``first_rule`` for an example.
 
