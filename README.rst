@@ -89,6 +89,8 @@ Part 4: Setting up Module Configs and Environment Files
 Part 5: Write Documentation and Debug Module
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Optional: The ``configs/conda/`` directory also contains the YAML that sets up a dataviz environment that (for now) supports Jupyter Notebooks and seaborn-based plotting. 
+
 1. Add your module's installation and running instructions to the ``README.rst`` and the module documentation. Then, add the repo to your `Read the Docs account <https://readthedocs.org/>`_ + turn on the Read the Docs service hook.
 
 2. Make the default conda environment, and run the module once through to make sure everything works using the test data in ``test_data/``. Then, generate unit tests to ensure that others can sanity-check their installations.

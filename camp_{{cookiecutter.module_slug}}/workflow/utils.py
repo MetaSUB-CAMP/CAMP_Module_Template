@@ -24,8 +24,6 @@ def ingest_samples(samples, tmp):
     df = pd.read_csv(samples, header = 0, index_col = 0) # name, ctgs, fwd, rev
     s = list(df.index)
     lst = df.values.tolist()
-    for f in os.listdir(tmp):
-        os.remove(join(tmp, f))
     for i,l in enumerate(lst):
         # Symlink your original data to the temporary directory
         # if not exists(join(tmp, s[i] + '.fasta')):
@@ -33,6 +31,11 @@ def ingest_samples(samples, tmp):
             # Example: extract_from_gzip(abspath(l[1]), join(tmp, s[i] + '_1.fastq'))
             # Example: extract_from_gzip(abspath(l[2]), join(tmp, s[i] + '_2.fastq'))
     return s
+
+
+def check_make(d):
+    if not exists(d):
+        makedirs(d)
 
 
 class Workflow_Dirs:
@@ -45,15 +48,18 @@ class Workflow_Dirs:
         self.OUT = join(work_dir, '{{ cookiecutter.module_slug }}')
         self.TMP = join(work_dir, 'tmp') 
         self.LOG = join(work_dir, 'logs') 
-        if not exists(self.OUT):
-            makedirs(self.OUT)
-            # Add custom subdirectories to organize intermediate files
-            makedirs(join(self.OUT, 'final_reports'))
-        if not exists(self.TMP):
-            makedirs(self.TMP)
-        if not exists(self.LOG):
-            # Add custom subdirectories to organize rule logs
-            makedirs(self.LOG)
+        # Add custom subdirectories to organize intermediate files
+        check_make(self.OUT)
+        out_dirs = ['final_reports']
+        for d in out_dirs: 
+            check_make(join(self.OUT, d))
+        # Add a subdirectory for symlinked-in input files
+        check_make(self.TMP)
+        # Add custom subdirectories to organize rule logs
+        check_make(self.LOG)
+        log_dirs = []
+        for d in log_dirs: 
+            check_make(join(self.LOG, d))
 
 
 def cleanup_files(work_dir, df):
