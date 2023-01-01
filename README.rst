@@ -13,7 +13,7 @@ Features
 * Standardized Snakemake pipelining structure with preset input/output formats for metagenomics multi-sample data
 * Integrated Slurm (HPC cluster job submission) and command-line modes
 * Click command line interface for easy parameter management
-* Unit-testing with pytest and simulated 2-species sequencing data
+* Included test metagenomics sequencing dataset for installation checking
 * Read the Docs-compatible automated documentation
 * Pre-configured version bumping with a single command
 
@@ -44,6 +44,17 @@ Part 1: Setting up the Module Barebones
 
     conda create -f configs/conda/module.yaml
     conda activate module
+
+4. Run tests on the included sample dataset to make sure everything installed correctly. 
+
+::
+
+    python /path/to/camp_module/workflow/module.py \
+    -d /path/to/camp_module/test_out \
+    -s /path/to/camp_module/test_data/samples.csv \
+    -p /path/to/camp_module/test_data/parameters.yaml \
+    -r /path/to/camp_module/test_data/resources.yaml \
+    --cores 20
 
 Part 2: Writing Module Steps (Rules)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -93,15 +104,9 @@ Optional: The ``configs/conda/`` directory also contains the YAML that sets up a
 
 1. Add your module's installation and running instructions to the ``README.rst`` and the module documentation. Then, add the repo to your `Read the Docs account <https://readthedocs.org/>`_ + turn on the Read the Docs service hook.
 
-2. Make the default conda environment, and run the module once through to make sure everything works using the test data in ``test_data/``. Then, generate unit tests to ensure that others can sanity-check their installations.
+2. Make the default conda environment, and run the module once through to make sure everything works using the test data in ``test_data/``. 
     * The default number of cores available to Snakemake is 1 which is enough for test data, but should probably be adjusted to 10+ for a real dataset.
     * Relative or absolute paths to the Snakefile and/or the working directory (if you're running elsewhere) are accepted!
-::
-
-    python /path/to/camp_module/workflow/module.py (--unit_test) \
-        (-c max_number_of_local_cpu_cores) \
-        -d /path/to/work/dir \
-        -s /path/to/samples.csv
 
 3. If you want your module integrated into the main CAMP module, send a pull request and we'll have a look at it ASAP! 
     - Please make it clear what your module intends to do by including a summary in the commit/pull request (ex. "Release X.Y.Z: Module A, which does B to input C and outputs D").
