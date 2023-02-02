@@ -1,4 +1,4 @@
-"""Top-level package for camp_{{ cookiecutter.module_slug }}."""
+"""Top-level package for the CAMP {{ cookiecutter.module_name }} module."""
 
 __author__ = {{ cookiecutter.full_name }}
 __email__ = {{ cookiecutter.email }}

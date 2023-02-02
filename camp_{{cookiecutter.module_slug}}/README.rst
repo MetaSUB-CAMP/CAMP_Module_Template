@@ -12,7 +12,7 @@ CAMP {{ cookiecutter.module_name }}
         :alt: Documentation Status
 {%- endif %}
 
-.. image:: https://img.shields.io/badge/version-0.1.0-brightgreen
+.. image:: https://img.shields.io/badge/version-{{ cookiecutter.version }}-brightgreen
 
 
 Overview
@@ -45,12 +45,7 @@ Installation
     conda create -f configs/conda/{{ cookiecutter.module_slug }}.yaml
     conda activate {{ cookiecutter.module_slug }}
     # Run tests on the included sample dataset
-    python /path/to/camp_{{ cookiecutter.module_slug }}/workflow/{{ cookiecutter.module_slug }}.py \
-    -d /path/to/camp_{{ cookiecutter.module_slug }}/test_out \
-    -s /path/to/camp_{{ cookiecutter.module_slug }}/test_data/samples.csv \
-    -p /path/to/camp_{{ cookiecutter.module_slug }}/test_data/parameters.yaml \
-    -r /path/to/camp_{{ cookiecutter.module_slug }}/test_data/resources.yaml \
-    --cores 20
+    python /path/to/camp_{{ cookiecutter.module_slug }}/workflow/{{ cookiecutter.module_slug }}.py test
 
 
 Using the Module
@@ -155,11 +150,10 @@ These instructions are meant for developers who have made a tool and want to int
 5. Run the pipeline once through to make sure everything works using the test data in ``test_data/`` if appropriate, or your own appropriately-sized test data. 
     * Note: Python functions imported from ``utils.py`` into ``Snakefile`` should be debugged on the command-line first before being added to a rule because Snakemake doesn't port standard output/error well when using ``run:``.
 
-6. Increment the version number of the modular pipeline.
+6. Increment the version number of the modular pipeline- ``patch`` for bug fixes (changes E), ``minor`` for substantial changes to the rules and/or workflow (changes C), and ``major`` only applies to major releases of the CAMP. 
 ::
 
-    bump2version --allow-dirty --commit --tag major workflow/__init__.py \
-                 --current-version A.C.E --new-version B.D.F
+    bump2version --current-version A.C.E patch
 
 7. If you want your tool integrated into the main CAMP pipeline, send a pull request and we'll have a look at it ASAP! 
     - Please make it clear what your tool intends to do by including a summary in the commit/pull request (ex. "Release X.Y.Z: Integration of tool A, which does B to C and outputs D").

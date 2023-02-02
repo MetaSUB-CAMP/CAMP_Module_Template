@@ -2,6 +2,8 @@
 CAMP Module Template
 ====================
 
+.. image:: https://img.shields.io/badge/version-0.4.0-brightgreen
+
 Overview
 --------
 
