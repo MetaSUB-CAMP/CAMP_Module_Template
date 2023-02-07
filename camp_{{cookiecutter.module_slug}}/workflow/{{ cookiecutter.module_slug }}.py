@@ -56,7 +56,7 @@ def cmd_line(workflow, work_dir, samples, env_yamls, pyaml, ryaml, cores, env_di
         printshellcmds = True,
         keepgoing = True,
         latency_wait = 60,
-        generate_unit_tests = unit_test_dir,
+        # generate_unit_tests = unit_test_dir,
         dryrun = dry_run,
         unlock = unlock
     )
