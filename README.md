@@ -1,10 +1,12 @@
 # CAMP Module Template
 
-.. image:: https://img.shields.io/badge/version-0.5.0-brightgreen
+[![Documentation Status](https://img.shields.io/readthedocs/camp_module_template)](https://camp-documentation.readthedocs.io/en/latest/) 
+
+![Version](https://img.shields.io/badge/version-0.6.0-brightgreen)
 
 ## Overview
 
-The Cookiecutter template for all CAMP (**C**\ ore **A**\ nalysis **M**\ etagenomics **P**\ ipeline) modules. 
+The Cookiecutter template for all CAMP (**C**ore **A**nalysis **M**etagenomics **P**ipeline) modules. 
 
 ## Features
 
@@ -32,7 +34,7 @@ pip install -U cookiecutter
 2. Use this template to generate a barebones CAMP analysis module and follow the prompts.
 
 ```Bash
-cookiecutter https://github.com/lauren-mak/CAMP_Module_Template.git
+cookiecutter https://github.com/MetaSUB-CAMP/CAMP_Module_Template
 ```
 
 3. Set up the module environment.
@@ -94,8 +96,16 @@ conda activate module
     --cores 20
 ```
 
-3. Optional: The `configs/conda/` directory also contains the YAML that sets up a dataviz environment that (for now) supports Jupyter Notebooks and seaborn-based plotting. You can include a Jupyter notebook that generates preset visualizations for your module's output.
+3. Trim down the data in `test_data/` so that only the necessary and sufficient input data are present (along with `samples.csv`, `parameters.yaml`, and `resources.yaml`).
 
-4. If you want your module integrated into the main CAMP module, please contact [Lauren](mailto:lam4003@med.cornell.edu) or [Braden](btt4001@med.cornell.edu)!
-    - Please make it clear what your module intends to do by including a summary in the commit/pull request (ex. "Module A Release X.Y.Z, which does B to input C and outputs D").
+4. Remove any test data files that are larger than 100MB because Github repos will not allow those to be pulled to remote. 
+
+### Part 6: Data Visualization (Optional)
+
+The `configs/conda/` directory also contains the YAML that sets up a dataviz environment that (for now) supports Jupyter Notebooks and seaborn-based plotting. You can include a Jupyter notebook that generates preset visualizations for your module's output.
+
+### Integrating with the CAMP
+
+If you want your module integrated into the main CAMP module, please contact [Lauren](mailto:lam4003@med.cornell.edu) or [Braden](btt4001@med.cornell.edu)!
+    - Please make it clear what your module intends to do by including a summary ex. "Module A Release X.Y.Z, which does B to input C and outputs D").
 
