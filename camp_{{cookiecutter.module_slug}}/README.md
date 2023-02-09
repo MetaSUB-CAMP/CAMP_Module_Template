@@ -23,8 +23,7 @@ This module is designed to function as both a standalone MAG {{ cookiecutter.mod
  --->
 
 
-Installation
-------------
+## Installation
 
 1. Clone repo from [Github](<https://github.com/MetaSUB-CAMP/camp_{{ cookiecutter.module_slug }}). 
 
@@ -42,8 +41,7 @@ conda activate {{ cookiecutter.module_slug }}
 python /path/to/camp_{{ cookiecutter.module_slug }}/workflow/{{ cookiecutter.module_slug }}.py test
 ```
 
-Using the Module
-----------------
+## Using the Module
 
 **Input**: `/path/to/samples.csv` provided by the user.
 
@@ -77,9 +75,9 @@ Using the Module
     - For example, `ingest_samples` in `workflow/utils.py` expects Illumina reads in FastQ (may be gzipped) form and de novo assembled contigs in FastA form
     - `samples.csv` requires either absolute paths or paths relative to the directory that the module is being run in.
 
-2. Update the relevant parameters in `test_data/parameters.yaml`.
+2. Update the relevant parameters in `configs/parameters.yaml`.
 
-3. Update the computational resources available to the pipeline in `test_data/resources.yaml`. 
+3. Update the computational resources available to the pipeline in `configs/resources.yaml`. 
 
 4. To run CAMP on the command line, use the following, where `/path/to/work/dir` is replaced with the absolute path of your chosen working directory, and `/path/to/samples.csv` is replaced with your copy of `samples.csv`. 
     - The default number of cores available to Snakemake is 1 which is enough for test data, but should probably be adjusted to 10+ for a real dataset.
@@ -121,8 +119,7 @@ python /path/to/camp_{{ cookiecutter.module_slug }}/workflow/{{ cookiecutter.mod
     -s /path/to/samples.csv
 ```
 
-Credits
--------
+## Credits
 
 {% if is_open_source %} 
 - This package was created with [Cookiecutter](https://github.com/cookiecutter/cookiecutter>) as a simplified version of the [project template](https://github.com/audreyr/cookiecutter-pypackage>).

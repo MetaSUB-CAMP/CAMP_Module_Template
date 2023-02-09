@@ -1,6 +1,6 @@
 # CAMP Module Template
 
-[![Documentation Status](https://img.shields.io/readthedocs/camp_module_template)](https://camp-documentation.readthedocs.io/en/latest/) ![Version](https://img.shields.io/badge/version-0.5.1-brightgreen)
+[![Documentation Status](https://img.shields.io/readthedocs/camp_module_template)](https://camp-documentation.readthedocs.io/en/latest/) ![Version](https://img.shields.io/badge/version-0.5.2-brightgreen)
 
 ## Overview
 
@@ -105,5 +105,5 @@ The `configs/conda/` directory also contains the YAML that sets up a dataviz env
 ### Integrating with the CAMP
 
 If you want your module integrated into the main CAMP module, please contact [Lauren](mailto:lam4003@med.cornell.edu) or [Braden](btt4001@med.cornell.edu)!
-    - Please make it clear what your module intends to do by including a summary ex. "Module A Release X.Y.Z, which does B to input C and outputs D").
+- Please make it clear what your module intends to do by including a summary ex. "Module A Release X.Y.Z, which does B to input C and outputs D").
 
