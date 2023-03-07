@@ -12,7 +12,7 @@ import pandas as pd
 import shutil
 
 
-def extract_from_gzip(p, out):
+def extract_from_gzip(ap, out):
     if open(ap, 'rb').read(2) == b'\x1f\x8b': # If the input is gzipped
         with gzip.open(ap, 'rb') as f_in, open(out, 'wb') as f_out:
             shutil.copyfileobj(f_in, f_out)

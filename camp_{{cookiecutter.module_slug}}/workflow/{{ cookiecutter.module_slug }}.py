@@ -37,7 +37,7 @@ def sbatch(workflow, work_dir, samples, env_yamls, pyaml, ryaml, cores, env_dir,
     ])
 
 
-def cmd_line(workflow, work_dir, samples, env_yamls, pyaml, ryaml, cores, env_dir, unit_test_dir, dry_run, unlock):
+def cmd_line(workflow, work_dir, samples, env_yamls, pyaml, ryaml, cores, env_dir, dry_run, unlock):
     snakemake(
         workflow,
         config = {
@@ -56,7 +56,6 @@ def cmd_line(workflow, work_dir, samples, env_yamls, pyaml, ryaml, cores, env_di
         printshellcmds = True,
         keepgoing = True,
         latency_wait = 60,
-        # generate_unit_tests = unit_test_dir,
         dryrun = dry_run,
         unlock = unlock
     )
@@ -112,7 +111,7 @@ def run(cores, work_dir, samples, parameters, resources, slurm, dry_run, unlock,
     # If rules failed previously, unlock the directory
     if unlock:
         cmd_line(workflow, work_dir, samples, env_yamls, pyaml, ryaml,   \
-                 cores, env_dir, None, False, unlock) # unit_test_dir
+                 cores, env_dir, False, unlock)
         rmtree(join(getcwd(), '.snakemake'))
         
     # Run workflow
@@ -126,11 +125,11 @@ def run(cores, work_dir, samples, parameters, resources, slurm, dry_run, unlock,
         f = io.StringIO()
         with redirect_stdout(f):
             cmd_line(workflow, work_dir, samples, env_yamls, pyaml, ryaml,   \
-                     cores, env_dir, None, True, False) # unit_test_dir
+                     cores, env_dir, True, False)
         print_cmds(f.getvalue())
     else:
         cmd_line(workflow, work_dir, samples, env_yamls, pyaml, ryaml,   \
-                 cores, env_dir, None, False, False) # unit_test_dir
+                 cores, env_dir, False, False)
 
 
 @cli.command('cleanup')

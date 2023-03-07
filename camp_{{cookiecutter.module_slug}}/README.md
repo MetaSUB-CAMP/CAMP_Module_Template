@@ -1,8 +1,6 @@
 {% set is_open_source = cookiecutter.open_source_license != 'Not open source' -%}
 
-{% for _ in cookiecutter.module_name %}={% endfor %}
 # CAMP {{ cookiecutter.module_name }}
-{% for _ in cookiecutter.module_name %}={% endfor %}
 
 {% if is_open_source %}
 [![Documentation Status](https://img.shields.io/readthedocs/camp_{{ cookiecutter.module_slug }})](https://camp-documentation.readthedocs.io/en/latest/{{ cookiecutter.module_slug }}.html) 
@@ -35,7 +33,7 @@ This module is designed to function as both a standalone MAG {{ cookiecutter.mod
 ```Bash
 # Create and activate conda environment 
 cd camp_{{ cookiecutter.module_slug }}
-conda create -f configs/conda/{{ cookiecutter.module_slug }}.yaml
+conda env create -f configs/conda/{{ cookiecutter.module_slug }}.yaml
 conda activate {{ cookiecutter.module_slug }}
 # Run tests on the included sample dataset
 python /path/to/camp_{{ cookiecutter.module_slug }}/workflow/{{ cookiecutter.module_slug }}.py test
